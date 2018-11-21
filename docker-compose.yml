@@ -1,0 +1,39 @@
+version: "3.7"
+
+services:
+  app:
+    container_name: es-learn
+    build:
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      - "./:/app"
+    ports:
+      - 3000:3000
+    entrypoint:
+      - ./node_modules/.bin/nodemon
+      - index.js
+  elastic-search:
+    image: docker.elastic.co/elasticsearch/elasticsearch:6.3.2
+    container_name: elastic-search
+    environment:
+      - discovery.type=single-node
+      - "cluster.name=es-learn-cluster"
+    volumes:
+      - "es-learn:/usr/share/elasticsearch/data"
+    ports:
+      - 9200:9200
+      - 9300:9300
+
+  elastichq:
+    image: elastichq/elasticsearch-hq:latest
+    container_name: elastichq
+    ports:
+      - "5000:5000"
+    environment:
+      HQ_DEFAULT_URL: "http://elastic-search:9200"
+    depends_on:
+      - elastic-search
+
+volumes:
+  es-learn: ~
